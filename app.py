@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from matplotlib import pyplot as plt
+import seaborn as sns
 import io
 
 web_apps = st.sidebar.selectbox("Select Web Apps",
@@ -18,6 +19,13 @@ if web_apps == "Exploratory Data Analysis":
 
     if show_df:
       st.write(df)
+
+    # Display relevant statistics about the dataset
+    st.write('# of Rows:', df.shape[0])
+    st.write('# of Columns:', df.shape[1])
+    st.write('# of Numerical:', len(df.select_dtypes(include=['int64', 'float64']).columns))
+    st.write('# of Categorical:', len(df.select_dtypes(include=['object']).columns))
+    st.write('# of Boolean:', len(df.select_dtypes(include=['bool']).columns))
 
     column_type = st.sidebar.selectbox('Select Data Type',
                                        ("Numerical", "Categorical", "Bool", "Date"))
@@ -55,3 +63,16 @@ if web_apps == "Exploratory Data Analysis":
             file_name="flower.png",
             mime="image/png"
         )
+
+    elif column_type == "Categorical":
+      categorical_column = st.sidebar.selectbox(
+          'Select a Column', df.select_dtypes(include=['object']).columns)
+
+      # Display proportions of each category level
+      st.write(df[categorical_column].value_counts(normalize=True))
+
+      # Barplot
+      fig, ax = plt.subplots()
+      sns.countplot(x=categorical_column, data=df, ax=ax)
+      plt.xticks(rotation=90)
+      st.pyplot(fig)
